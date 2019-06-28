@@ -230,9 +230,11 @@ export default class Db {
                 VALUES (?, ?, ?)
                 ON CONFLICT DO NOTHING`, e.source, e.sCreated, e.sH);
 
-                sourceHToId[e.sH!] = (await this.conn.get(`
+                const r = await this.conn.get(`
                 SELECT id FROM source
-                WHERE h = ?`, e.sH)).id;
+                WHERE h = ?`, e.sH);
+
+                sourceHToId[e.sH!] = r ? r.id : console.log(e);
 
                 sourceSet.add(e.sH!);
             }
@@ -252,12 +254,14 @@ export default class Db {
             e.js,
             sourceHToId[e.sH!]);
 
-            templateKeyToId[`${e.template}\x1f${e.model}`] = (await this.conn.get(`
+            const r = await this.conn.get(`
             SELECT id FROM template
             WHERE
                 sourceId = ? AND
                 name = ? AND
-                model = ?`, sourceHToId[e.sH!], e.template, e.model)).id
+                model = ?`, sourceHToId[e.sH!], e.template, e.model);
+
+            templateKeyToId[`${e.template}\x1f${e.model}`] = r ? r.id : console.log(e);
         }
 
         const noteKeyToId: {[key: string]: number} = {};
@@ -267,12 +271,14 @@ export default class Db {
                     noteKeyToId[e.key!] = (await this.conn.run(`
                     INSERT INTO note (sourceId, key, data)
                     VALUES (?, ?, ?)`, sourceHToId[e.sH!], e.key, JSON.stringify(e.data))).lastID;
-                } catch (e) {
-                    noteKeyToId[e.key!] = (await this.conn.get(`
+                } catch (err) {
+                    const r = await this.conn.get(`
                     SELECT id FROM note
                     WHERE
                         sourceId = ? AND
-                        key = ?`, sourceHToId[e.sH!], e.key)).id;
+                        key = ?`, sourceHToId[e.sH!], e.key);
+
+                    noteKeyToId[e.key!] = r ? r.id : console.log(e);
                 }
             }
         }
@@ -535,7 +541,7 @@ export default class Db {
             cond: {id: cardId}
         }, {
             limit: 1,
-            fields: ["front", "back", "mnemonic", "tFront", "tBack", "data"]
+            fields: ["front", "back", "mnemonic", "tFront", "tBack", "data", "css", "js"]
         });
 
         const c = r.data[0];
@@ -552,7 +558,9 @@ export default class Db {
         return {
             front: c.front,
             back: c.back,
-            mnemonic: c.mnemonic
+            mnemonic: c.mnemonic,
+            css: c.css,
+            js: c.js
         }
     }
 

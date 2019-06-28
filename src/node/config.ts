@@ -4,6 +4,7 @@ import { AppDirs } from "appdirs";
 import fs from "fs";
 import dotenv from "dotenv";
 import Db from "./engine/db";
+import http from "http";
 dotenv.config();
 
 interface IConfig {
@@ -14,6 +15,7 @@ interface IConfig {
     TMP_FOLDER: string;
     MEDIA_FOLDER: string;
     IO?: SocketIO.Server;
+    SERVER?: http.Server;
 }
 
 export function resourcePath(relativePath: string): string {
@@ -45,18 +47,21 @@ export const g: IConfig = (() => {
     if (!fs.existsSync(config.MEDIA_FOLDER)) {
         fs.mkdirSync(config.MEDIA_FOLDER);
     }
-    
-    async function exitHandler() {
-        if (fs.existsSync(config.TMP_FOLDER)) {
-            fs.unlinkSync(config.TMP_FOLDER);
-        }
-    
-        await config.DB.close();
-    }
-    
-    process.on("exit", exitHandler);
-    process.on("SIGINT", exitHandler);
-    process.on("uncaughtException", exitHandler);
 
     return config;
 })();
+
+async function exitHandler() {
+    await g.DB.close();
+    g.SERVER!.close()
+
+    try {
+        if (fs.existsSync(g.TMP_FOLDER)) {
+            fs.unlinkSync(g.TMP_FOLDER);
+        }
+    } catch (e) {}
+}
+
+process.on("exit", exitHandler);
+process.on("SIGINT", exitHandler);
+process.on("uncaughtException", exitHandler);

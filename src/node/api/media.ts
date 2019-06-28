@@ -23,4 +23,10 @@ router.get("/*", asyncHandler(async (req, res) => {
     return res.sendStatus(404);
 }));
 
+router.post("/", (req, res) => {
+    return res.json({
+        path: g.MEDIA_FOLDER
+    });
+});
+
 export default router;

@@ -7,6 +7,8 @@ import fs from "fs";
 import Anki from "../engine/anki";
 import { g } from "../config";
 import Db from "../engine/db";
+import { mongoFilter } from "../engine/search";
+import sanitize from "sanitize-filename";
 
 const router = Router();
 router.use(fileUpload());
@@ -51,5 +53,31 @@ g.IO!.on("connection", (socket: any) => {
         }
     });
 });
+
+router.get("/export", asyncHandler(async (req, res) => {
+    const {deck, reset} = req.query;
+    const filepath = path.join(g.TMP_FOLDER, uuid());
+    const newDb = new Db(filepath);
+    const db = g.DB;
+
+    await newDb.build();
+
+    await newDb.insertMany((await db.getAll()).filter(mongoFilter({$or: [
+        {deck: deck},
+        {deck: {$startswith: `${deck}/`}}
+    ]})).map((c) => {
+        if (reset) {
+            delete c.srsLevel;
+            delete c.nextReview;
+            delete c.stat;
+        }
+
+        return c;
+    }));
+
+    await newDb.close();
+
+    return res.download(filepath, `${sanitize(deck)}.r2r`);
+}));
 
 export default router;

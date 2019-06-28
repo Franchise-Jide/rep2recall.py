@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { IDataSocket } from './engine/db';
+import { inspect } from 'util';
 
 export function generateSecret(): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -18,6 +19,7 @@ export function escapeRegExp(s: string) {
 
 export function ankiMustache(s: string, data: IDataSocket[] = [], front: string = ""): string {
     s = s.replace(/{{FrontSide}}/g, (front || "").replace(/@[^\n]+\n/g, ""));
+
     for (const d of data) {
         s = s.replace(new RegExp(`{{(\\S+:)?${escapeRegExp(d.key)}}}`), d.value);
     }
@@ -35,4 +37,8 @@ export function ankiMustache(s: string, data: IDataSocket[] = [], front: string 
     s = s.replace(/{{[^}]+}}/g, "");
 
     return s;
+}
+
+export function pp(x: any) {
+    console.log(inspect(x, {depth: null, colors: true}));
 }

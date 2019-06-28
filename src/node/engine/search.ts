@@ -254,7 +254,7 @@ export function mongoFilter(cond: any) {
                                         return itemK.startsWith(cond[k][op]);
                                     }
                                 } else if (op === "$exists") {
-                                    return (itemK === null || itemK === undefined || itemK === "") === cond[k][op];
+                                    return (itemK === null || itemK === undefined || itemK === "") !== cond[k][op];
                                 } else {
                                     let v = itemK;
                                     let v0 = cond[k][op];

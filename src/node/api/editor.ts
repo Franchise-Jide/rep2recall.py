@@ -1,13 +1,17 @@
 import { Router } from "express";
 import asyncHandler from "express-async-handler";
 import { g } from "../config";
+import { SearchParser } from "../engine/search";
 
 const router = Router();
 
 router.post("/", asyncHandler(async (req, res) => {
-    const {cond, offset, limit} = req.body;
+    const {q, offset, limit, sortBy, desc} = req.body;
+    const parser = new SearchParser();
+    const cond = parser.doParse(q);
+
     const db = g.DB;
-    return res.json(await db.parseCond(cond, {offset, limit}));
+    return res.json(await db.parseCond(cond, {offset, limit, sortBy, desc}));
 }));
 
 router.put("/", asyncHandler(async (req, res) => {

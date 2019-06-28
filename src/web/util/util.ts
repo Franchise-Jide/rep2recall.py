@@ -91,18 +91,18 @@ export function escapeRegExp(s: string) {
 
 export function fixData(d: any): any {
     if (d.front && ["@md5\n", "@template\n", "@rendered\n"].some((c) => d.front.startsWith(c))) {
-        d.front = "@rendered\n" + ankiMustache(d.tFront, d);
+        d.front = "@rendered\n" + ankiMustache(d.tFront, d.data);
     }
 
     if (d.back && ["@md5\n", "@template\n", "@rendered\n"].some((c) => d.back.startsWith(c))) {
-        d.back = "@rendered\n" + ankiMustache(d.tBack, d);
+        d.back = "@rendered\n" + ankiMustache(d.tBack, d.data, d.front);
     }
 
     return d;
 }
 
 export function md2html(s: string, d: any): string {
-    s = ankiMustache(s, d);
+    s = ankiMustache(s, d.data, d.front);
     return mdConverter.makeHtml(s.replace(/@([^\n]+)\n/g, ""));
 }
 
