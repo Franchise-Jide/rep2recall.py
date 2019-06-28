@@ -1,6 +1,7 @@
 import showdown from "showdown";
 import swal from "sweetalert";
 import Vue from "vue";
+import { ankiMustache } from "../../node/util";
 
 export function shuffle(a: any[]) {
     for (let i = a.length - 1; i > 0; i--) {
@@ -98,34 +99,6 @@ export function fixData(d: any): any {
     }
 
     return d;
-}
-
-export interface IKv {
-    key: string,
-    value: string
-}
-
-export function ankiMustache(s: string, d: any): string {
-    s = s.replace(/{{FrontSide}}/g, (d.front || "").replace(/@[^\n]+\n/g, ""));
-
-    const data: IKv[] = d.data || [];
-    for (const d of data) {
-        s = s.replace(new RegExp(`{{(\\S+:)?${escapeRegExp(d.key)}}}`), d.value);
-    }
-
-    const keys = data.map((d) => d.key);
-
-    s = s.replace(/{{#(\S+)}}(.*){{\1}}/gs, (m, p1, p2) => {
-        if (keys.includes(p1)) {
-            return p2;
-        } else {
-            return "";
-        }
-    });
-
-    s = s.replace(/{{[^}]+}}/g, "");
-
-    return s;
 }
 
 export function md2html(s: string, d: any): string {

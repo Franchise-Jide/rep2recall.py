@@ -1,6 +1,7 @@
 import { Vue, Component, Prop, Emit } from "vue-property-decorator";
 import h from "hyperscript";
-import { quizDataToContent, ankiMustache } from "../util/util";
+import { quizDataToContent } from "../util/util";
+import { ankiMustache } from "../../node/util";
 
 @Component({
     template: h(".w-100", [
@@ -42,7 +43,8 @@ export default class MarkdownEditor extends Vue {
 
     @Emit("input")
     private onValueChanged(newValue: string) {
-        this.html = quizDataToContent(this.readonlyData, null, ankiMustache(newValue, this.readonlyData));
+        this.html = quizDataToContent(this.readonlyData, null,
+            ankiMustache(newValue, this.readonlyData.data, this.readonlyData.front || ""));
         return newValue;
     }
 }

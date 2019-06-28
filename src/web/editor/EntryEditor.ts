@@ -2,7 +2,7 @@ import { Vue, Component, Prop, Emit } from "vue-property-decorator";
 import h from "hyperscript";
 import { Columns } from "../shared";
 import DatetimeNullable from "./DatetimeNullable";
-import { fetchJSON, normalizeArray, dotGetter, dotSetter, fixData, IKv, deepMerge } from "../util/util";
+import { fetchJSON, normalizeArray, dotGetter, dotSetter, fixData, deepMerge } from "../util/util";
 import TagEditor from "./TagEditor";
 import swal from "sweetalert";
 import MarkdownEditor from "./MarkdownEditor";
@@ -198,7 +198,7 @@ export default class EntryEditor extends Vue {
     private deepMerge = deepMerge;
 
     get dataCols() {
-        return (this.data.data || []).map((d: IKv) => d.key).map((c: string) => {
+        return (this.data.data || []).map((d: any) => d.key).map((c: string) => {
             return {
                 name: `@${c}`,
                 label: c
